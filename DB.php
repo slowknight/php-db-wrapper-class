@@ -101,9 +101,8 @@ class DB
      * 
      * @return boolean true if insert successful; false otherwise
      */
-    public function insert($tableName, $tableData) {
-        // INSERT INTO TABLENAME($keys) VALUES ($values);
-        $this->_query = "INSERT INTO $tableName";
+    public function insert($tableName, $tableData) 
+    {   
         if( gettype($tableData) != "array" )
             return false;
         if( gettype($tableName) != "string" )
@@ -111,6 +110,8 @@ class DB
         
         //build query 
         /* TODO : Looks like building query might be something to be replicated, might add build_query() func*/
+        
+        $this->_query = "INSERT INTO $tableName";
         
         $keys = array_keys($tableData);
         $this->_query .= "(" . implode(", ", $keys) . ") VALUES (";
@@ -136,7 +137,8 @@ class DB
         return $stmt->execute();
     }
 
-    public function __destruct() {
+    public function __destruct() 
+    {
         // Close connection to db
     }
 }
