@@ -49,11 +49,11 @@ class DB
     }
     
     /**
-     * Helper function which performs a SELECT statement on the passed in
+     * Helper method which performs a SELECT statement on the passed in
      * table and returns an array of rows
      * 
-     * @param type $tableName Table name
-     * @param type $numRows Number of rows to be returned (optional)
+     * @param string $tableName Name of the table
+     * @param integer $numRows Number of rows to be returned (optional)
      * 
      * @return array Array of arrays
      */
@@ -92,10 +92,52 @@ class DB
     {
         return $this->query("DESCRIBE $tableName");
     }
+    
+    /**
+     * Helper method which inserts data described in the passed in argument into the passed in table
+     * 
+     * @param string $tableName Name of the table
+     * @param array $tableData Data to be inserted as an associative array: array(field => value)
+     * 
+     * @return boolean true if insert successful; false otherwise
+     */
+    public function insert($tableName, $tableData) {
+        // INSERT INTO TABLENAME($keys) VALUES ($values);
+        $this->_query = "INSERT INTO $tableName";
+        if( gettype($tableData) != "array" )
+            return false;
+        if( gettype($tableName) != "string" )
+            return false;
+        
+        //build query 
+        /* TODO : Looks like building query might be something to be replicated, might add build_query() func*/
+        
+        $keys = array_keys($tableData);
+        $this->_query .= "(" . implode(", ", $keys) . ") VALUES (";
+        for ( $i = 0; $i < count($tableData); $i++ ) {
+            $this->_query .= "?";
+            if( $i != count($tableData) - 1 ) {
+                $this->_query .= ",";
+            }
+        }
+        $this->_query .= ")";
+        
+        //prepare it
+        $stmt = $this->_prepareQuery($this->_query);
+        $count = 0;
+        $values = array_values($tableData);
+        
+        array_map(function($param) use (&$stmt, &$count) {
+            $count ++;
+            $stmt->bindParam($count, $param);
+            echo "$count, $param";
+        }, $values);
+        
+        return $stmt->execute();
+    }
 
     public function __destruct() {
         // Close connection to db
     }
 }
 
-?>
